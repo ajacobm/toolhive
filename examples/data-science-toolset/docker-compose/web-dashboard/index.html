@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Visualization Gateway</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+            line-height: 1.6;
+        }
+
+        .card-link {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+            align-self: flex-start;
+        }
+
+        .card-link:hover {
+            background: #764ba2;
+        }
+
+        .card.coming-soon {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .card.coming-soon .card-link {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #f0f0f0;
+            color: #666;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.soon {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .info-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .info-section h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .info-section li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .info-section code {
+            background: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #e83e8c;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-item .label {
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .status-item .value {
+            color: #667eea;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #ffd;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔬 MCP Visualization Gateway</h1>
+            <p>Unified access to all data science tool outputs</p>
+        </header>
+
+        <div class="grid">
+            <!-- Penrose Diagrams -->
+            <div class="card">
+                <span class="badge active">● Active</span>
+                <h3>📐 Penrose Diagrams</h3>
+                <p>Mathematical and structural diagrams generated automatically from declarative specifications. Perfect for visualizing complex relationships and system architectures.</p>
+                <a href="/penrose/" class="card-link">View Diagrams →</a>
+            </div>
+
+            <!-- Data Explorer -->
+            <div class="card">
+                <span class="badge active">● Active</span>
+                <h3>📊 Data Explorer</h3>
+                <p>Interactive data analysis with visualizations, charts, and statistical summaries. Explore large datasets, identify patterns, and generate insights automatically.</p>
+                <a href="/explorer/" class="card-link">View Artifacts →</a>
+            </div>
+
+            <!-- Code Graph -->
+            <div class="card coming-soon">
+                <span class="badge soon">◐ Coming Soon</span>
+                <h3>🌐 Code Graph</h3>
+                <p>Interactive visualization of code dependencies, module relationships, and project structure. Built with Vue.js for rich, real-time exploration.</p>
+                <a href="/code-graph/" class="card-link">View Graphs →</a>
+            </div>
+        </div>
+
+        <!-- API Access Section -->
+        <div class="info-section">
+            <h2>🔌 Direct API Access (Debug Only)</h2>
+            <ul>
+                <li><code>/api/penrose</code> - Penrose MCP service</li>
+                <li><code>/api/explorer</code> - Data Exploration service</li>
+                <li><code>/api/datagov</code> - Data.gov dataset search</li>
+                <li><code>/api/treasury</code> - US Treasury fiscal data</li>
+            </ul>
+        </div>
+
+        <!-- Gateway Status -->
+        <div class="info-section">
+            <h2>⚡ Gateway Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="label">Gateway</div>
+                    <div class="value">✓ Running</div>
+                </div>
+                <div class="status-item">
+                    <div class="label">Penrose</div>
+                    <div class="value">✓ Active</div>
+                </div>
+                <div class="status-item">
+                    <div class="label">Explorer</div>
+                    <div class="value">✓ Active</div>
+                </div>
+                <div class="status-item">
+                    <div class="label">Data.gov</div>
+                    <div class="value">✓ Active</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start -->
+        <div class="info-section">
+            <h2>🚀 Quick Start</h2>
+            <ul>
+                <li>Start exploring with <strong>Data Explorer</strong> to analyze CSV files</li>
+                <li>Generate diagrams with <strong>Penrose</strong> for mathematical relationships</li>
+                <li>Search government data with <strong>Data.gov</strong> integration</li>
+                <li>Analyze economic trends with <strong>Treasury</strong> data</li>
+                <li>All outputs auto-update at their respective paths</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>MCP Visualization Gateway • Part of Toolhive Data Science Toolset</p>
+            <p><a href="/health">Health Check</a> | <a href="/status">Status JSON</a></p>
+        </footer>
+    </div>
+</body>
+</html>
