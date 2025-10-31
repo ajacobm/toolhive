@@ -1,0 +1,146 @@
+version: '3.9'
+
+services:
+  # Analysis: Data Exploration (343⭐ production-ready)
+  data-exploration:
+    image: reading-plus/mcp-server-data-exploration:latest
+    container_name: data-exploration
+    ports:
+      - "8003:8003"
+    environment:
+      PORT: "8003"
+    volumes:
+      - data-explorer-work:/tmp/data-explorer
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "analysis"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 8G
+
+  # Discovery: Dataset Viewer (browse HF without download)
+  dataset-viewer:
+    image: privetin/dataset-viewer:latest
+    container_name: dataset-viewer
+    ports:
+      - "8002:8002"
+    environment:
+      HUGGINGFACE_TOKEN: ${HF_TOKEN}
+      PORT: "8002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "discovery"
+
+  # Discovery: Data.gov (US federal datasets via CKAN)
+  datagov-mcp:
+    image: melaodoidao/datagov-mcp-server:latest
+    container_name: datagov-mcp
+    ports:
+      - "8006:8006"
+    environment:
+      PORT: "8006"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "discovery"
+
+  # Discovery: US Treasury Fiscal Data
+  fiscal-data-mcp:
+    image: quantgeekdev/fiscal-data-mcp:latest
+    container_name: fiscal-data-mcp
+    ports:
+      - "8007:8007"
+    environment:
+      PORT: "8007"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "discovery"
+
+  # Visualization: Penrose (mathematical diagrams)
+  penrose-mcp:
+    image: bmorphism/penrose-mcp:latest
+    container_name: penrose-mcp
+    ports:
+      - "8008:8008"
+    environment:
+      PORT: "8008"
+    volumes:
+      - ~/.penrose:/work/diagrams
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8008/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "visualization"
+
+  # Web UI: Simple SVG/diagram viewer
+  penrose-viewer:
+    image: nginx:alpine
+    container_name: penrose-viewer
+    ports:
+      - "8888:80"
+    volumes:
+      - ~/.penrose:/usr/share/nginx/html:ro
+      - ./penrose-viewer.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - penrose-mcp
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "viewer"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  data-science:
+    driver: bridge
+
+volumes:
+  data-explorer-work:
