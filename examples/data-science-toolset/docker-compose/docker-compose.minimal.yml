@@ -1,6 +1,25 @@
 version: '3.9'
 
 services:
+  # Analysis: Data Exploration MCP (mcp-server-ds)
+  data-exploration:
+    build:
+      context: ../
+      dockerfile: containers/Dockerfile.data-exploration
+    container_name: data-exploration
+    ports:
+      - "8003:8003"
+    environment:
+      PORT: "8003"
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "analysis"
+    volumes:
+      - data-explorer-work:/tmp/data-explorer
+
   # Web UI: Unified NGINX gateway
   nginx-gateway:
     image: nginx:alpine
