@@ -1,0 +1,132 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: data-science-isolation
+  namespace: data-science
+spec:
+  podSelector:
+    matchLabels:
+      mcp-toolset: "true"
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: toolhive-operator
+        - podSelector:
+            matchLabels:
+              role: client
+      ports:
+        - protocol: TCP
+          port: 8001
+        - protocol: TCP
+          port: 8002
+        - protocol: TCP
+          port: 8003
+        - protocol: TCP
+          port: 8004
+        - protocol: TCP
+          port: 8005
+        - protocol: TCP
+          port: 8006
+        - protocol: TCP
+          port: 8007
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+    - to:
+        - podSelector:
+            matchLabels:
+              app: datahub-gms
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: data-science-ingress
+  namespace: data-science
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - mcp.example.com
+        - data-science.example.com
+      secretName: data-science-tls
+  rules:
+    - host: mcp.example.com
+      http:
+        paths:
+          - path: /huggingface
+            pathType: Prefix
+            backend:
+              service:
+                name: huggingface-mcp
+                port:
+                  number: 8001
+          - path: /dataset-viewer
+            pathType: Prefix
+            backend:
+              service:
+                name: dataset-viewer
+                port:
+                  number: 8002
+          - path: /data-explorer
+            pathType: Prefix
+            backend:
+              service:
+                name: data-exploration
+                port:
+                  number: 8003
+          - path: /pandas
+            pathType: Prefix
+            backend:
+              service:
+                name: mcp-pandas
+                port:
+                  number: 8004
+          - path: /datahub
+            pathType: Prefix
+            backend:
+              service:
+                name: datahub-mcp
+                port:
+                  number: 8005
+          - path: /datagov
+            pathType: Prefix
+            backend:
+              service:
+                name: datagov-mcp
+                port:
+                  number: 8006
+          - path: /fiscal-data
+            pathType: Prefix
+            backend:
+              service:
+                name: fiscal-data-mcp
+                port:
+                  number: 8007
+    - host: data-science.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: huggingface-mcp
+                port:
+                  number: 8001

@@ -1,0 +1,73 @@
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: mcp-pandas
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+    analysis: "true"
+spec:
+  image: alistairwalsh/mcp-pandas:latest
+  imagePullPolicy: IfNotPresent
+  transport:
+    type: streamable-http
+  env:
+    - name: PYTHONUNBUFFERED
+      value: "1"
+  ports:
+    - name: http
+      containerPort: 8004
+      protocol: TCP
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8004
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8004
+    initialDelaySeconds: 15
+    periodSeconds: 15
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+  volumeMounts:
+    - name: work
+      mountPath: /work
+    - name: tmp
+      mountPath: /tmp
+  volumes:
+    - name: work
+      emptyDir: {}
+    - name: tmp
+      emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-pandas
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: mcp-pandas
+  ports:
+    - name: http
+      port: 8004
+      targetPort: 8004
+      protocol: TCP

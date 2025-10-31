@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: data-science
+  labels:
+    name: data-science
+    mcp-toolset: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mcp-toolset
+  namespace: data-science
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mcp-toolset
+  namespace: data-science
+rules:
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mcp-toolset
+  namespace: data-science
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mcp-toolset
+subjects:
+  - kind: ServiceAccount
+    name: mcp-toolset
+    namespace: data-science

@@ -1,0 +1,186 @@
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: dataset-viewer
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+    discovery: "true"
+spec:
+  image: privetin/dataset-viewer:latest
+  imagePullPolicy: IfNotPresent
+  transport:
+    type: streamable-http
+  env:
+    - name: HUGGINGFACE_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: hf-credentials
+          key: token
+          optional: true
+  ports:
+    - name: http
+      containerPort: 8002
+      protocol: TCP
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8002
+    initialDelaySeconds: 30
+    periodSeconds: 30
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8002
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: datagov-mcp
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+    discovery: "true"
+spec:
+  image: melaodoidao/datagov-mcp-server:latest
+  imagePullPolicy: IfNotPresent
+  transport:
+    type: streamable-http
+  ports:
+    - name: http
+      containerPort: 8006
+      protocol: TCP
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8006
+    initialDelaySeconds: 30
+    periodSeconds: 30
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8006
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: fiscal-data-mcp
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+    discovery: "true"
+spec:
+  image: quantgeekdev/fiscal-data-mcp:latest
+  imagePullPolicy: IfNotPresent
+  transport:
+    type: streamable-http
+  ports:
+    - name: http
+      containerPort: 8007
+      protocol: TCP
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8007
+    initialDelaySeconds: 30
+    periodSeconds: 30
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8007
+    initialDelaySeconds: 10
+    periodSeconds: 10
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dataset-viewer
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: dataset-viewer
+  ports:
+    - name: http
+      port: 8002
+      targetPort: 8002
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datagov-mcp
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: datagov-mcp
+  ports:
+    - name: http
+      port: 8006
+      targetPort: 8006
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fiscal-data-mcp
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: fiscal-data-mcp
+  ports:
+    - name: http
+      port: 8007
+      targetPort: 8007
+      protocol: TCP

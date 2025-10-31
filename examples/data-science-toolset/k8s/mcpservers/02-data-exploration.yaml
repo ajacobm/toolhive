@@ -1,0 +1,66 @@
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: data-exploration
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+    analysis: "true"
+spec:
+  image: reading-plus/mcp-server-data-exploration:latest
+  imagePullPolicy: IfNotPresent
+  transport:
+    type: streamable-http
+  ports:
+    - name: http
+      containerPort: 8003
+      protocol: TCP
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1000m"
+    limits:
+      memory: "8Gi"
+      cpu: "4000m"
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8003
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8003
+    initialDelaySeconds: 15
+    periodSeconds: 15
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+  volumeMounts:
+    - name: work
+      mountPath: /tmp/data-explorer
+  volumes:
+    - name: work
+      emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-exploration
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: data-exploration
+  ports:
+    - name: http
+      port: 8003
+      targetPort: 8003
+      protocol: TCP

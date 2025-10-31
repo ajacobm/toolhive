@@ -1,0 +1,200 @@
+version: '3.9'
+
+services:
+  # Discovery: Hugging Face (900k+ models, datasets, papers)
+  huggingface-mcp:
+    image: shreyas/huggingface-mcp-server:latest
+    container_name: huggingface-mcp
+    ports:
+      - "8001:8001"
+    environment:
+      HF_TOKEN: ${HF_TOKEN:-}
+      PORT: "8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "discovery"
+
+  # Discovery: Dataset Viewer (HF datasets without download)
+  dataset-viewer:
+    image: privetin/dataset-viewer:latest
+    container_name: dataset-viewer
+    ports:
+      - "8002:8002"
+    environment:
+      HUGGINGFACE_TOKEN: ${HF_TOKEN:-}
+      PORT: "8002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "discovery"
+
+  # Analysis: Data Exploration (343⭐ production-ready)
+  data-exploration:
+    image: reading-plus/mcp-server-data-exploration:latest
+    container_name: data-exploration
+    ports:
+      - "8003:8003"
+    environment:
+      PORT: "8003"
+    volumes:
+      - data-explorer-work:/tmp/data-explorer
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "analysis"
+    resource_limits:
+      cpus: '2'
+      memory: 8G
+
+  # Analysis: MCP Pandas (containerized pandas + FastAPI)
+  mcp-pandas:
+    image: alistairwalsh/mcp-pandas:latest
+    container_name: mcp-pandas
+    ports:
+      - "8004:8004"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PORT: "8004"
+    volumes:
+      - pandas-work:/work
+      - pandas-tmp:/tmp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "analysis"
+    resource_limits:
+      cpus: '2'
+      memory: 4G
+
+  # Governance: DataHub Metadata (lineage, discovery, governance)
+  datahub-mcp:
+    image: acryldata/mcp-server-datahub:latest
+    container_name: datahub-mcp
+    ports:
+      - "8005:8005"
+    environment:
+      DATAHUB_GMS_URL: ${DATAHUB_GMS_URL:-}
+      DATAHUB_GMS_TOKEN: ${DATAHUB_GMS_TOKEN:-}
+      PORT: "8005"
+    depends_on:
+      - datahub-gms
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "governance"
+
+  # Discovery: Data.gov (US government datasets via CKAN)
+  datagov-mcp:
+    image: melaodoidao/datagov-mcp-server:latest
+    container_name: datagov-mcp
+    ports:
+      - "8006:8006"
+    environment:
+      PORT: "8006"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "discovery"
+
+  # Discovery: US Treasury Fiscal Data
+  fiscal-data-mcp:
+    image: quantgeekdev/fiscal-data-mcp:latest
+    container_name: fiscal-data-mcp
+    ports:
+      - "8007:8007"
+    environment:
+      PORT: "8007"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "discovery"
+
+  # Optional: DataHub GMS (metadata backend)
+  datahub-gms:
+    image: linkedin/datahub-gms:latest
+    container_name: datahub-gms
+    ports:
+      - "8080:8080"
+    environment:
+      DATAHUB_SERVER_PORT: "8080"
+      METADATA_SERVICE_HOST_URL: "http://datahub-gms:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - data-science
+    labels:
+      mcp-toolset: "true"
+      category: "governance"
+    profiles:
+      - with-datahub-backend
+
+networks:
+  data-science:
+    driver: bridge
+
+volumes:
+  data-explorer-work:
+  pandas-work:
+  pandas-tmp:
