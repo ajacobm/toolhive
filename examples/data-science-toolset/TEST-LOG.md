@@ -67,3 +67,75 @@ docker-compose -f docker-compose.minimal.yml down
 - Proxy endpoints commented out (will uncomment when services exist)
 - No persistent storage tested (~/. penrose, ~/.data-explorer dirs)
 - Browser automation (Playwright) needs Chrome install
+
+---
+
+## Session 2: Added First MCP Service (Oct 31, 2025)
+
+### What We Added
+
+1. **Data Exploration container**: ✅ Built from mcp-server-ds PyPI package
+2. **NGINX proxy routing**: ✅ /api/explorer/ → data-exploration:8003
+3. **Docker Compose integration**: ✅ Both services start together
+
+### Build Process
+
+```bash
+cd docker-compose
+docker-compose build data-exploration      # ~70 packages installed
+docker-compose up -d                       # Both services start
+```
+
+### Status
+
+**NGINX Gateway**: ✅ Running, dashboard served on :8888  
+**Data Exploration**: ❌ Crashing on startup - MCP library version mismatch
+
+### Issue Found
+
+```
+ImportError: cannot import name 'McpError' from 'mcp.server'
+```
+
+Root cause: mcp-server-ds (v0.1.5) incompatible with mcp (v1.20.0) installed.  
+Need to pin specific compatible versions in Dockerfile.
+
+### Next Action
+
+Either:
+1. Pin MCP version in Dockerfile (check mcp-server-ds pyproject.toml for compatible version)
+2. Or fork/fix mcp-server-ds to work with latest MCP SDK
+
+### Architecture Verified
+
+✅ Two-service pattern works:
+- Service builds locally from Dockerfile
+- docker-compose orchestration works
+- NGINX proxy routing framework ready
+- Can add more services (Treasury, Data.gov, etc.) following same pattern
+
+### Commands Used
+
+```bash
+# Build specific service
+docker-compose build --no-cache data-exploration
+
+# Check logs
+docker-compose logs data-exploration
+
+# Verify NGINX still working
+docker exec nginx-gateway wget -q -O - http://127.0.0.1/ 
+
+# Check service status
+docker-compose ps
+```
+
+### Learning: Start Simple Edition
+
+We proved the "start simple, level up" strategy works:
+1. ✅ First: Get basic NGINX gateway working
+2. ✅ Second: Add one service, build & test integration
+3. ⏭️ Next: Fix version issues, add more services
+4. ⏭️ Eventually: Deploy to Kubernetes
+
+Each step is independent, testable, and incrementally better.
