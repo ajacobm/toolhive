@@ -5,8 +5,13 @@
 ### Prerequisites
 ```bash
 # Verify HF token is loaded
+set -a; source ~/.envs; set +a
 echo $HF_TOKEN
 # Should output: hf_HpPhCsZ...
+
+# Build Data Exploration image (if not using published version)
+cd ~/GitHub/toolhive/examples/data-science-toolset/containers
+docker build -f Dockerfile.data-exploration -t mcp-data-exploration:latest .
 ```
 
 ### Start Services
