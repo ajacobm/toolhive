@@ -45,7 +45,8 @@ ImportError: cannot import name 'McpError' from 'mcp.server'
 ```
 
 **Fix Options**:
-1. Check mcp-server-ds source for compatible MCP version
+1. Check ~/GitHub/mcp-python-sdk source for the right way; 
+1b. check context7 mcp if it's enabled for you re python mcp sdk details and techniques;
 2. Pin versions in Dockerfile:
    ```dockerfile
    RUN uv pip install --system mcp==<compatible-version> mcp-server-ds
