@@ -74,10 +74,18 @@ ToolHive is a Kubernetes operator that manages MCP servers and registries, provi
    - /huggingface → huggingface-mcp:8001
    - /data-explorer → data-exploration:8003
    - /pandas → mcp-pandas:8004
-   - etc.
+   - /datahub → datahub-mcp:8005
+   - /penrose → penrose-mcp:8006
+   - /gov-data → gov-data-mcp:8007
+   - /dataset-viewer → dataset-viewer-mcp:8008
 2. Configure TLS with Let's Encrypt certificates
-3. Set up custom domain names for external access
-4. Configure proxy timeouts for long-running operations
+3. We have a custom domain name with GoDaddy: finetunings.ai
+   - Set up custom domain names for external access (finetunings.ai and *.finetunings.ai)
+   - I may migrate to Cloudflare soon-ish
+4. Configure proxy timeouts for long-running operations (3600 seconds for read/send timeouts)
+5. Add routes to output paths for services that produce output:
+   - Penrose: SVG output via /penrose path
+   - Future extensions for matplotlib output from pandas or data exploration services
 
 ### Phase 4: Integration Testing
 1. Verify all MCP servers are accessible via ingress
