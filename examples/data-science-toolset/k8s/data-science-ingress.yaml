@@ -1,0 +1,148 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+  namespace: data-science
+spec:
+  selfSigned: {}
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: toolhive-data-science-cert
+  namespace: data-science
+spec:
+  secretName: toolhive-data-science-tls
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+  dnsNames:
+  - "finetunings.ai"
+  - "*.finetunings.ai"
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: data-science-ingress
+  namespace: data-science
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  tls:
+  - hosts:
+    - finetunings.ai
+    - "*.finetunings.ai"
+    secretName: toolhive-data-science-tls
+  rules:
+  - host: finetunings.ai
+    http:
+      paths:
+      - path: /huggingface
+        pathType: Prefix
+        backend:
+          service:
+            name: huggingface-mcp
+            port:
+              number: 8001
+      - path: /data-explorer
+        pathType: Prefix
+        backend:
+          service:
+            name: data-exploration
+            port:
+              number: 8003
+      - path: /pandas
+        pathType: Prefix
+        backend:
+          service:
+            name: mcp-pandas
+            port:
+              number: 8004
+      - path: /datahub
+        pathType: Prefix
+        backend:
+          service:
+            name: datahub-mcp
+            port:
+              number: 8005
+      - path: /penrose
+        pathType: Prefix
+        backend:
+          service:
+            name: penrose-mcp
+            port:
+              number: 8006
+      - path: /gov-data
+        pathType: Prefix
+        backend:
+          service:
+            name: gov-data-mcp
+            port:
+              number: 8007
+      - path: /dataset-viewer
+        pathType: Prefix
+        backend:
+          service:
+            name: dataset-viewer-mcp
+            port:
+              number: 8008
+  - host: "*.finetunings.ai"
+    http:
+      paths:
+      - path: /huggingface
+        pathType: Prefix
+        backend:
+          service:
+            name: huggingface-mcp
+            port:
+              number: 8001
+      - path: /data-explorer
+        pathType: Prefix
+        backend:
+          service:
+            name: data-exploration
+            port:
+              number: 8003
+      - path: /pandas
+        pathType: Prefix
+        backend:
+          service:
+            name: mcp-pandas
+            port:
+              number: 8004
+      - path: /datahub
+        pathType: Prefix
+        backend:
+          service:
+            name: datahub-mcp
+            port:
+              number: 8005
+      - path: /penrose
+        pathType: Prefix
+        backend:
+          service:
+            name: penrose-mcp
+            port:
+              number: 8006
+      - path: /gov-data
+        pathType: Prefix
+        backend:
+          service:
+            name: gov-data-mcp
+            port:
+              number: 8007
+      - path: /dataset-viewer
+        pathType: Prefix
+        backend:
+          service:
+            name: dataset-viewer-mcp
+            port:
+              number: 8008
