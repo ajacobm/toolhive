@@ -1,0 +1,22 @@
+# Local environment files
+.env
+.compose.env
+
+# IDE files
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build artifacts
+*.tar.gz
+*.zip
+
+# Local configuration
+config.local
