@@ -1,0 +1,187 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: huggingface-mcp-hpa
+  namespace: data-science
+spec:
+  scaleTargetRef:
+    apiVersion: toolhive.stacklok.dev/v1alpha1
+    kind: MCPServer
+    name: huggingface-mcp
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: data-exploration-hpa
+  namespace: data-science
+spec:
+  scaleTargetRef:
+    apiVersion: toolhive.stacklok.dev/v1alpha1
+    kind: MCPServer
+    name: data-exploration
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mcp-pandas-hpa
+  namespace: data-science
+spec:
+  scaleTargetRef:
+    apiVersion: toolhive.stacklok.dev/v1alpha1
+    kind: MCPServer
+    name: mcp-pandas
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: datahub-mcp-hpa
+  namespace: data-science
+spec:
+  scaleTargetRef:
+    apiVersion: toolhive.stacklok.dev/v1alpha1
+    kind: MCPServer
+    name: datahub-mcp
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: penrose-mcp-hpa
+  namespace: data-science
+spec:
+  scaleTargetRef:
+    apiVersion: toolhive.stacklok.dev/v1alpha1
+    kind: MCPServer
+    name: penrose-mcp
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gov-data-mcp-hpa
+  namespace: data-science
+spec:
+  scaleTargetRef:
+    apiVersion: toolhive.stacklok.dev/v1alpha1
+    kind: MCPServer
+    name: gov-data-mcp
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: dataset-viewer-mcp-hpa
+  namespace: data-science
+spec:
+  scaleTargetRef:
+    apiVersion: toolhive.stacklok.dev/v1alpha1
+    kind: MCPServer
+    name: dataset-viewer-mcp
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: NetworkPolicy
+metadata:
+  name: mcp-server-isolation
+  namespace: data-science
+spec:
+  podSelector:
+    matchLabels:
+      mcp-toolset: "true"
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: toolhive-system
+    ports:
+    - protocol: TCP
+      port: 8001
+    - protocol: TCP
+      port: 8003
+    - protocol: TCP
+      port: 8004
+    - protocol: TCP
+      port: 8005
+    - protocol: TCP
+      port: 8006
+    - protocol: TCP
+      port: 8007
+    - protocol: TCP
+      port: 8008
+  egress:
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80

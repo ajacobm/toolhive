@@ -1,0 +1,66 @@
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: penrose-mcp
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+    visualization: "true"
+spec:
+  image: ghcr.io/stacklok/penrose-mcp:latest
+  imagePullPolicy: IfNotPresent
+  transport:
+    type: streamable-http
+  ports:
+    - name: http
+      containerPort: 8006
+      protocol: TCP
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8006
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    failureThreshold: 3
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8006
+    initialDelaySeconds: 15
+    periodSeconds: 15
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+  volumeMounts:
+    - name: work
+      mountPath: /tmp/penrose
+  volumes:
+    - name: work
+      emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: penrose-mcp
+  namespace: data-science
+  labels:
+    mcp-toolset: "true"
+spec:
+  type: ClusterIP
+  selector:
+    app: penrose-mcp
+  ports:
+    - name: http
+      port: 8006
+      targetPort: 8006
+      protocol: TCP
